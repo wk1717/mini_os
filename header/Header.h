@@ -8,6 +8,8 @@
 #include <time.h>
 #include <utime.h>
 #include <pthread.h>
+#include <unistd.h>
+#include <string.h>
 
 //Max 길이 설정
 #define MAX_BUFFER 512

@@ -453,9 +453,15 @@ void classificationCommand(char * cmd){
         // zip output.zip file1 file2 ...
         char* zipName = strtok_r(NULL, " ", &saveptr);
         if (zipName == NULL) {
-            printf("사용법: zip [압축파일이름].zip [압축할파일1] [압축할파일2] ...\n");
+            printf("사용법: zip [압축파일이름] [압축할파일1] [압축할파일2] ...\n");
+            printf("예시: zip archive file1.txt file2.txt\n");
             return;
         }
+
+        // .zip 확장자 추가
+        char zipFilename[MAX_ROUTE] = {0};
+        snprintf(zipFilename, sizeof(zipFilename), "%s%s", zipName, 
+            (strstr(zipName, ".zip") != NULL) ? "" : ".zip");
 
         char* fileArgs[MAX_BUFFER];
         int fileCount = 0;
@@ -463,8 +469,8 @@ void classificationCommand(char * cmd){
         
         // 입력 파일이 없는 경우
         if (nextFile == NULL) {
-            printf("사용법: zip [압축파일이름].zip [압축할파일1] [압축할파일2] ...\n");
-            printf("예시: zip archive.zip file1.txt file2.txt\n");
+            printf("사용법: zip [압축파일이름] [압축할파일1] [압축할파일2] ...\n");
+            printf("예시: zip archive file1.txt file2.txt\n");
             return;
         }
 
@@ -482,11 +488,11 @@ void classificationCommand(char * cmd){
 
         if (fileCount == 0) {
             printf("zip: 압축할 수 있는 파일이 없습니다.\n");
-            printf("사용법: zip [압축파일이름].zip [압축할파일1] [압축할파일2] ...\n");
+            printf("사용법: zip [압축파일이름] [압축할파일1] [압축할파일2] ...\n");
             return;
         }
 
-        zip_files(zipName, fileArgs, fileCount);
+        zip_files(zipFilename, fileArgs, fileCount);
 
         // 압축 파일을 가상 디렉토리에 추가
         MkdirArgs* args = (MkdirArgs*)calloc(1, sizeof(MkdirArgs));
@@ -494,7 +500,7 @@ void classificationCommand(char * cmd){
             printf("메모리 할당 실패\n");
             return;
         }
-        strncpy(args->path, zipName, MAX_ROUTE - 1);
+        strncpy(args->path, zipFilename, MAX_ROUTE - 1);
         args->path[MAX_ROUTE - 1] = '\0';
         strncpy(args->mode, "644", 3);
         args->mode[3] = '\0';
@@ -510,7 +516,7 @@ void classificationCommand(char * cmd){
             newFile->type = '-';
             // 압축 파일 크기 업데이트
             char filePath[256] = {0};
-            snprintf(filePath, sizeof(filePath), "information/resources/file/%s", zipName);
+            snprintf(filePath, sizeof(filePath), "information/resources/file/%s", zipFilename);
             FILE* fp = fopen(filePath, "rb");
             if (fp != NULL) {
                 fseek(fp, 0, SEEK_END);
